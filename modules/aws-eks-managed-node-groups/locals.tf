@@ -10,10 +10,10 @@ locals {
     release_version          = ""
     force_update_version     = null
 
-    desired_size    = "3"
-    max_size        = "3"
-    min_size        = "1"
-    max_unavailable = "1"
+    desired_size    = 3
+    max_size        = 3
+    min_size        = 1
+    max_unavailable = 1
     disk_size       = 50 # disk_size will be ignored when using Launch Templates
 
     k8s_labels      = {}
@@ -61,13 +61,10 @@ locals {
     var.managed_ng
   )
 
-  policy_arn_prefix = "arn:${var.context.aws_partition_id}:iam::aws:policy"
-  ec2_principal     = "ec2.${var.context.aws_partition_dns_suffix}"
-
   userdata_params = {
-    eks_cluster_id       = var.context.eks_cluster_id
-    cluster_ca_base64    = var.context.cluster_ca_base64
-    cluster_endpoint     = var.context.cluster_endpoint
+    eks_cluster_id       = var.cluster_id
+    cluster_ca_base64    = var.cluster_ca_base64
+    cluster_endpoint     = var.cluster_endpoint
     custom_ami_id        = local.managed_node_group["custom_ami_id"]
     pre_userdata         = local.managed_node_group["pre_userdata"]         # Applied to all launch templates
     bootstrap_extra_args = local.managed_node_group["bootstrap_extra_args"] # used only when custom_ami_id specified e.g., bootstrap_extra_args="--use-max-pods false --container-runtime containerd"
@@ -86,14 +83,14 @@ locals {
   ))
 
   common_tags = merge(
-    var.context.tags,
+    .tags,
     local.managed_node_group["additional_tags"],
     {
-      Name = "${var.context.eks_cluster_id}-${local.managed_node_group["node_group_name"]}"
+      Name = "${var.cluster_id}-${local.managed_node_group["node_group_name"]}"
     },
     {
-      "kubernetes.io/cluster/${var.context.eks_cluster_id}"     = "owned"
-      "k8s.io/cluster-autoscaler/${var.context.eks_cluster_id}" = "owned"
+      "kubernetes.io/cluster/${var.cluster_id}"     = "owned"
+      "k8s.io/cluster-autoscaler/${var.cluster_id}" = "owned"
       "k8s.io/cluster-autoscaler/enabled"                       = "TRUE"
   })
 }

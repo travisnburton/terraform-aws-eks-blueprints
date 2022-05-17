@@ -1,7 +1,7 @@
 resource "aws_launch_template" "managed_node_groups" {
   count = local.managed_node_group["create_launch_template"] == true ? 1 : 0
 
-  name                   = "${var.context.eks_cluster_id}-${local.managed_node_group["node_group_name"]}"
+  name                   = "${var.cluster_id}-${local.managed_node_group["node_group_name"]}"
   description            = "Launch Template for EKS Managed Node Groups"
   update_default_version = true
 
@@ -46,7 +46,7 @@ resource "aws_launch_template" "managed_node_groups" {
 
   network_interfaces {
     associate_public_ip_address = local.managed_node_group["public_ip"]
-    security_groups             = var.context.worker_security_group_ids
+    security_groups             = var.worker_security_group_ids
   }
 
   lifecycle {

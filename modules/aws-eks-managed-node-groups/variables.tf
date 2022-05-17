@@ -5,6 +5,7 @@ variable "managed_ng" {
 }
 
 variable "context" {
+  description = "Input configuration for the Node groups"
   type = object({
     # EKS Cluster Config
     eks_cluster_id    = string
@@ -22,9 +23,6 @@ variable "context" {
     http_endpoint               = string
     http_tokens                 = string
     http_put_response_hop_limit = number
-    # Data sources
-    aws_partition_dns_suffix = string
-    aws_partition_id         = string
     #IAM
     iam_role_path                 = string
     iam_role_permissions_boundary = string
@@ -34,5 +32,4 @@ variable "context" {
     service_ipv6_cidr = string
     service_ipv4_cidr = string
   })
-  description = "Input configuration for the Node groups"
 }

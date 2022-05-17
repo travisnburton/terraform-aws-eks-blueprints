@@ -1,6 +1,6 @@
 resource "aws_eks_node_group" "managed_ng" {
 
-  cluster_name           = var.context.eks_cluster_id
+  cluster_name           = var.cluster_id
   node_group_name        = local.managed_node_group["enable_node_group_prefix"] == false ? local.managed_node_group["node_group_name"] : null
   node_group_name_prefix = local.managed_node_group["enable_node_group_prefix"] == true ? format("%s-", local.managed_node_group["node_group_name"]) : null
 
@@ -13,7 +13,7 @@ resource "aws_eks_node_group" "managed_ng" {
   disk_size            = local.managed_node_group["create_launch_template"] == true ? null : local.managed_node_group["disk_size"]
   instance_types       = local.managed_node_group["instance_types"]
   force_update_version = local.managed_node_group["force_update_version"]
-  version              = var.context.cluster_version
+  version              = var.cluster_version
 
   scaling_config {
     desired_size = local.managed_node_group["desired_size"]
@@ -75,5 +75,4 @@ resource "aws_eks_node_group" "managed_ng" {
     aws_iam_role_policy_attachment.managed_ng_AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.managed_ng
   ]
-
 }
