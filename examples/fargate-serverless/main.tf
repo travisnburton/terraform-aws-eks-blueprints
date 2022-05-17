@@ -103,22 +103,9 @@ module "eks_blueprints_kubernetes_addons" {
   enable_amazon_eks_coredns = true
   coredns_use_managed_addon = false
   coredns_helm_config = {
-    values = [
-      # The annotations are required to ensure the Fargate provisioner is used and not the EC2 provisioner
-      <<-EOT
-      image:
-        repository: 602401143452.dkr.ecr.${local.region}.amazonaws.com/eks/coredns
-        tag: ${data.aws_eks_addon_version.latest["coredns"].version}
-      deployment:
-        name: coredns
-        annotations:
-          eks.amazonaws.com/compute-type: fargate
-      service:
-        name: kube-dns
-        annotations:
-          eks.amazonaws.com/compute-type: fargate
-      EOT
-    ]
+    # Sets the correct annotations to ensure the Fargate provisioner is used and not the EC2 provisioner
+    compute_type       = "fargate"
+    kubernetes_version = module.eks_blueprints.eks_cluster_version
   }
 
   tags = local.tags
@@ -130,7 +117,7 @@ module "eks_blueprints_kubernetes_addons" {
 }
 
 data "aws_eks_addon_version" "latest" {
-  for_each = toset(["coredns", "kube-proxy", "vpc-cni"])
+  for_each = toset(["kube-proxy", "vpc-cni"])
 
   addon_name         = each.value
   kubernetes_version = module.eks_blueprints.eks_cluster_version
