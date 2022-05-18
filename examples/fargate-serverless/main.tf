@@ -112,7 +112,7 @@ module "eks_blueprints_kubernetes_addons" {
 
   depends_on = [
     # CoreDNS provided by EKS needs to be updated before applying self-managed CoreDNS Helm addon
-    null_resource.modify_coredns
+    null_resource.modify_kube_dns
   ]
 }
 
@@ -159,7 +159,8 @@ locals {
   })
 }
 
-resource "null_resource" "modify_coredns" {
+# Separate resource so that this is only ever executed once
+resource "null_resource" "remove_default_coredns_deployment" {
   triggers = {}
 
   provisioner "local-exec" {
@@ -172,11 +173,31 @@ resource "null_resource" "modify_coredns" {
     # However, we are maintaing the existing kube-dns service and annotating it for Helm to assume control
     command = <<-EOT
       kubectl --namespace kube-system delete deployment coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
+    EOT
+  }
+}
+
+resource "null_resource" "modify_kube_dns" {
+  triggers = {}
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      KUBECONFIG = base64encode(local.kubeconfig)
+    }
+
+    # We are maintaing the existing kube-dns service and annotating it for Helm to assume control
+    command = <<-EOT
+      echo "Setting implicit dependency on ${module.eks_blueprints.fargate_profiles["kube_system"].eks_fargate_profile_arn}"
       kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-name=coredns --kubeconfig <(echo $KUBECONFIG | base64 --decode)
       kubectl --namespace kube-system annotate --overwrite service kube-dns meta.helm.sh/release-namespace=kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)
       kubectl --namespace kube-system label --overwrite service kube-dns app.kubernetes.io/managed-by=Helm --kubeconfig <(echo $KUBECONFIG | base64 --decode)
     EOT
   }
+
+  depends_on = [
+    null_resource.remove_default_coredns_deployment
+  ]
 }
 
 #---------------------------------------------------------------
