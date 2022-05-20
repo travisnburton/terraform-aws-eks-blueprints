@@ -28,7 +28,7 @@ The below demonstrates how you can leverage EKS Blueprints to deploy an EKS clus
 
 ```hcl
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.2"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.4"
 
   # EKS CLUSTER
   cluster_version           = "1.21"
@@ -46,7 +46,7 @@ module "eks_blueprints" {
 }
 
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.0.2"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.0.4"
 
   eks_cluster_id = module.eks_blueprints.eks_cluster_id
 
